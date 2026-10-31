@@ -1,0 +1,14 @@
+services:
+  gitviewer:
+    build: .
+    container_name: ${CONTAINER_NAME:-git-change-viewer}
+    restart: unless-stopped
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "${PORT:-8005}:8005"
+    volumes:
+      # Mounted at the same path so folder paths in settings match the host.
+      - ${ALLOW_ROOT:?set ALLOW_ROOT in .env}:${ALLOW_ROOT}:ro
+    environment:
+      - PROJECTS_DIR=${PROJECTS_DIR:-${ALLOW_ROOT}}
+      - ALLOW_ROOT=${ALLOW_ROOT}
