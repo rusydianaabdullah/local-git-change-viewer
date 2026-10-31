@@ -118,6 +118,7 @@
   <label>Code font <select data-k="mono">
     <option value="monospace">Monospace</option><option value="'JetBrains Mono', monospace">JetBrains Mono</option>
     <option value="'Fira Code', monospace">Fira Code</option><option value="Consolas, 'Courier New', monospace">Consolas</option></select></label>
+  <label>Default changes view <select data-k="diffView"><option value="expand">Expanded</option><option value="collapse">Collapsed</option></select></label>
   <button onclick="resetSettings()">Reset appearance</button>
 </div></div>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Roboto:wght@400;500&family=JetBrains+Mono&family=Fira+Code&display=swap" rel="stylesheet">
@@ -129,8 +130,8 @@ const api = (p) => fetch(p).then((r) => r.json());
 const COLORS = ['#e06c75','#61afef','#98c379','#e5c07b','#c678dd','#56b6c2','#d19a66'];
 let current = null;
 
-// Settings live in IndexedDB: { folders: [...], theme, fs, cfs, font, mono }
-const DEFAULTS = { theme: 'dark', fs: '14', cfs: '12', font: 'system-ui, sans-serif', mono: 'monospace' };
+// Settings live in IndexedDB: { folders: [...], theme, fs, cfs, font, mono, diffView }
+const DEFAULTS = { theme: 'dark', fs: '14', cfs: '12', font: 'system-ui, sans-serif', mono: 'monospace', diffView: 'expand' };
 let settings = { ...DEFAULTS, folders: [] };
 
 function idb() {
@@ -281,7 +282,7 @@ function showFiles(title, files, isCommit) {
   if (!files.length) html += '<div class="empty">No changes</div>';
   for (const f of files) {
     const code = f.code.trim()[0] || '?';
-    html += `<details open><summary><span class="code c-${esc(code)}">${esc(f.code.trim())}</span>${esc(f.path)}</summary>
+    html += `<details${settings.diffView === 'collapse' ? '' : ' open'}><summary><span class="code c-${esc(code)}">${esc(f.code.trim())}</span>${esc(f.path)}</summary>
       <pre>${f.diff ? diffHtml(f.diff) : '<span class="l-meta">(no diff / binary)</span>'}</pre></details>`;
   }
   $('#top').innerHTML = html;
