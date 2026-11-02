@@ -8,7 +8,12 @@ services:
       - "${PORT:-8005}:8005"
     volumes:
       # Mounted at the same path so folder paths in settings match the host.
-      - ${ALLOW_ROOT:?set ALLOW_ROOT in .env}:${ALLOW_ROOT}:ro
+      # Read-write so fetch/pull can update repos.
+      - ${ALLOW_ROOT:?set ALLOW_ROOT in .env}:${ALLOW_ROOT}
+      # Host git identity + stored HTTPS credentials for fetch/pull.
+      - ${GIT_CONFIG:-${HOME}/.gitconfig}:/gitHome/.gitconfig:ro
+      - ${GIT_CREDENTIALS:-${HOME}/.git-credentials}:/gitHome/.git-credentials:ro
     environment:
       - PROJECTS_DIR=${PROJECTS_DIR:-${ALLOW_ROOT}}
       - ALLOW_ROOT=${ALLOW_ROOT}
+      - HOME=/gitHome

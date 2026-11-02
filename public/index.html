@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git Viewer</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2b2d30">
 <style>
   :root { --bg:#1e1f22; --panel:#2b2d30; --line:#3c3f41; --fg:#dfe1e5; --dim:#8c8f94; --acc:#3574f0; --add:#4caf50; --del:#e05555; --mod:#e0a030;
     --hover:#35373b; --btn:#3c3f41; --code:#191a1c; --l-add:#1f3a24; --l-del:#47201f; --hunk:#6aa0ff; --ref:#24405f; --ref-fg:#6ccfff;
@@ -14,15 +18,15 @@
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--fg); font:var(--fs) var(--font); height:100vh; height:100dvh; display:flex; overflow:hidden; }
   #side { width:280px; background:var(--panel); border-right:1px solid var(--line); overflow:auto; flex-shrink:0; }
-  #side h1 { font-size:15px; margin:0; padding:12px; display:flex; justify-content:space-between; align-items:center; }
-  .group { color:var(--dim); font-size:12px; padding:8px 12px 2px; text-transform:uppercase; }
+  #side h1 { font-size:1.07em; margin:0; padding:12px; display:flex; justify-content:space-between; align-items:center; }
+  .group { color:var(--dim); font-size:.86em; padding:8px 12px 2px; text-transform:uppercase; }
   .repo { padding:7px 12px 7px 20px; cursor:pointer; display:flex; align-items:center; gap:6px; }
   .repo:hover { background:var(--hover); }
   .repo.active { background:var(--acc); }
   .repo .n { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .br { color:var(--dim); font-size:11px; }
+  .br { color:var(--dim); font-size:.79em; }
   .repo.active .br { color:#dde; }
-  .badge { font-size:11px; padding:1px 6px; border-radius:9px; }
+  .badge { font-size:.79em; padding:1px 6px; border-radius:9px; }
   .b-ch { background:var(--mod); color:#000; }
   .b-up { background:var(--add); color:#000; }
   .b-dn { background:var(--del); color:#fff; }
@@ -33,7 +37,7 @@
   #top { border-bottom:1px solid var(--line); }
   .bar { position:sticky; top:0; background:var(--panel); padding:8px 12px; border-bottom:1px solid var(--line); display:flex; gap:8px; align-items:center; z-index:1; flex-wrap:wrap; }
   .bar b { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  button { background:var(--btn); color:var(--fg); border:0; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:12px; }
+  button { background:var(--btn); color:var(--fg); border:0; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:.86em; }
   details { margin:8px 10px; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:var(--panel); }
   details[open] summary { border-bottom:1px solid var(--line); }
   summary { padding:6px 12px; cursor:pointer; font-family:var(--mono); font-size:var(--cfs); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -46,7 +50,7 @@
   .row:hover, .row.sel { background:var(--hover); }
   .row { align-items:center; height:24px; padding-top:0; padding-bottom:0; }
   .g { flex-shrink:0; display:block; }
-  .refs { display:inline-block; background:var(--ref); border-radius:3px; padding:0 4px; margin-right:3px; font-size:11px; }
+  .refs { display:inline-block; background:var(--ref); border-radius:3px; padding:0 4px; margin-right:3px; font-size:.79em; }
   .refs.head { background:#2e5a2e; color:#bfe8bf; }
   .refs.tag { background:#5a4a1e; color:#f0d890; }
   .h { color:var(--mod); } .refs { color:var(--ref-fg); } .s { flex:1; overflow:hidden; text-overflow:ellipsis; } .meta { color:var(--dim); }
@@ -64,25 +68,57 @@
   #settings { position:fixed; inset:0; background:#0008; display:none; align-items:center; justify-content:center; z-index:10; padding:12px; }
   #settings.show { display:flex; }
   .dlg { background:var(--panel); border:1px solid var(--line); border-radius:8px; width:420px; max-width:100%; max-height:100%; overflow:auto; padding:14px; }
-  .dlg h2 { font-size:15px; margin:0 0 10px; display:flex; justify-content:space-between; }
-  .dlg h3 { font-size:12px; color:var(--dim); text-transform:uppercase; margin:14px 0 6px; }
+  .dlg h2 { font-size:1.07em; margin:0 0 10px; display:flex; justify-content:space-between; }
+  .dlg h3 { font-size:.86em; color:var(--dim); text-transform:uppercase; margin:14px 0 6px; }
   .dlg label { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:6px 0; }
   .dlg input, .dlg select { background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:5px 7px; font:inherit; min-width:0; }
-  .folder { display:flex; gap:6px; align-items:center; padding:4px 0; font-family:var(--mono); font-size:12px; }
+  .folder { display:flex; gap:6px; align-items:center; padding:4px 0; font-family:var(--mono); font-size:.86em; }
   .folder span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .err { color:var(--del); font-size:12px; }
+  .err { color:var(--del); font-size:.86em; }
   .split-v { touch-action:none; width:5px; cursor:col-resize; background:var(--line); flex-shrink:0; }
   .split-h { touch-action:none; height:5px; cursor:row-resize; background:var(--line); flex-shrink:0; }
   .split-v:hover, .split-h:hover, .dragging { background:var(--acc); }
   #top { flex:none; height:50%; }
+  #toast { position:fixed; right:12px; bottom:12px; max-width:min(480px, calc(100% - 24px)); max-height:40vh; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font:var(--cfs)/1.5 var(--mono); white-space:pre-wrap; display:none; z-index:20; box-shadow:0 4px 16px #0006; cursor:pointer; }
+  #toast.show { display:block; }
+  #toast .bad { color:var(--del); }
+  button:disabled { opacity:.5; cursor:wait; }
+  .who { display:inline-flex; align-items:center; gap:4px; color:var(--dim); max-width:160px; overflow:hidden; flex-shrink:0; }
+  .av { width:1.45em; height:1.45em; border-radius:50%; color:#fff; font:bold .65em/1.45em var(--font); text-align:center; flex-shrink:0; }
+  .row.long { height:auto; min-height:24px; align-items:stretch; white-space:normal; }
+  .lv { flex:1; min-width:0; padding:3px 0 5px; }
+  .l1 { display:flex; gap:8px; align-items:center; height:18px; white-space:nowrap; }
+  .l1 .who { max-width:none; }
+  .l2 { white-space:normal; overflow-wrap:anywhere; line-height:1.45; margin-top:2px; }
+  .gcol { display:flex; flex-direction:column; flex-shrink:0; }
+  .gcol svg:last-child { flex:1 1 0; height:0; min-height:0; }
+  .upd { font-size:.72em; padding:1px 6px; border-radius:9px; white-space:nowrap; flex-shrink:0; font-weight:600; }
+  .upd.hot { background:var(--add); color:#000; }
+  .upd.warm { background:var(--acc); color:#fff; }
+  .upd.old { color:var(--dim); font-weight:normal; }
+  .repo.active .upd.old { color:#dde; }
+  .more { color:var(--dim); font-size:.72em; margin-left:4px; }
+  .cinfo { padding:10px 12px; border-bottom:1px solid var(--line); background:var(--panel); font-size:var(--fs); }
+  .cinfo .msg { white-space:pre-wrap; font:var(--cfs)/1.5 var(--mono); margin:8px 0 0; max-height:30vh; overflow:auto; }
+  .cinfo .msg b { font-size:calc(var(--cfs) + 1px); }
+  .cinfo .people > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cinfo .people > span:last-child { overflow-x:auto; text-overflow:clip; }
+  .cinfo .people > span > span:not(.av) { display:inline; }
+  .cinfo .msg { overflow-x:auto; overflow-wrap:anywhere; }
+  .cinfo .people { display:grid; grid-template-columns:auto minmax(0, 1fr); gap:2px 10px; color:var(--dim); font-size:.86em; }
+  .cinfo .people span:nth-child(odd) { text-transform:uppercase; font-size:.79em; }
+  .cinfo .people b { color:var(--fg); font-weight:600; }
+  .step { display:inline-flex; align-items:center; gap:6px; }
+  .step button { width:28px; font-size:1em; }
+  .step span { min-width:40px; text-align:center; font-family:var(--mono); }
   @media (max-width: 760px) {
-    body { font-size:13px; }
     #side { width:110px; }
     #top { height:45%; }
-    #side h1 { font-size:13px; padding:8px; }
+    #side h1 { font-size:.93em; padding:8px; }
     .repo { padding:6px 6px 6px 10px; }
     .group { padding:6px 8px 2px; }
     .meta.a { display:none; }
+    .who { max-width:70px; }
     .split-v { width:10px; } .split-h { height:10px; }
     summary, .row { padding-left:8px; padding-right:8px; }
   }
@@ -92,6 +128,8 @@
 <div id="side">
   <h1><span>Repositories</span><span><span class="tools">
     <button class="icon" onclick="this.classList.remove('spin'); void this.offsetWidth; this.classList.add('spin'); loadRepos()" title="Refresh"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button>
+    <button class="icon" onclick="syncAll('fetch')" title="Fetch all repos"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></button>
+    <button class="icon" onclick="syncAll('pull')" title="Pull all repos (fast-forward only)"><svg viewBox="0 0 24 24"><path d="M12 3v14"/><path d="M6 11l6 6 6-6"/><path d="M5 21h14"/><path d="M9 3h6"/></svg></button>
     <button class="icon" onclick="openSettings()" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </span></span></h1>
   <div class="list" id="repos"></div>
@@ -102,6 +140,7 @@
   <div class="split-h" id="splitH"></div>
   <div id="bottom"></div>
 </div>
+<div id="toast"></div>
 <div id="settings" onclick="if (event.target === this) closeSettings()"><div class="dlg">
   <h2>Settings <button onclick="closeSettings()">✕</button></h2>
   <h3>Folders</h3>
@@ -110,8 +149,8 @@
   <div class="err" id="folderErr"></div>
   <h3>Appearance</h3>
   <label>Theme <select data-k="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
-  <label>Font size <select data-k="fs"><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>18</option></select></label>
-  <label>Code font size <select data-k="cfs"><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option></select></label>
+  <label>Font size <span class="step"><button onclick="stepFont('fs', -1)">−</button><span id="v-fs"></span><button onclick="stepFont('fs', 1)">+</button></span></label>
+  <label>Code font size <span class="step"><button onclick="stepFont('cfs', -1)">−</button><span id="v-cfs"></span><button onclick="stepFont('cfs', 1)">+</button></span></label>
   <label>Font family <select data-k="font">
     <option value="system-ui, sans-serif">System</option><option value="Inter, sans-serif">Inter</option>
     <option value="Roboto, sans-serif">Roboto</option><option value="Georgia, serif">Serif</option></select></label>
@@ -131,7 +170,7 @@ const COLORS = ['#e06c75','#61afef','#98c379','#e5c07b','#c678dd','#56b6c2','#d1
 let current = null;
 
 // Settings live in IndexedDB: { folders: [...], theme, fs, cfs, font, mono, diffView }
-const DEFAULTS = { theme: 'dark', fs: '14', cfs: '12', font: 'system-ui, sans-serif', mono: 'monospace', diffView: 'expand' };
+const DEFAULTS = { theme: 'dark', fs: '14', cfs: '12', font: 'system-ui, sans-serif', mono: 'monospace', diffView: 'expand', graphView: 'simple' };
 let settings = { ...DEFAULTS, folders: [] };
 
 function idb() {
@@ -171,8 +210,18 @@ function applySettings() {
 function openSettings() {
   document.querySelectorAll('[data-k]').forEach((el) => el.value = settings[el.dataset.k]);
   renderFolders();
+  showFontSizes();
   $('#settings').classList.add('show');
 }
+
+const FONT_MIN = 7, FONT_MAX = 24;
+function stepFont(k, d) {
+  settings[k] = String(Math.max(FONT_MIN, Math.min(FONT_MAX, +settings[k] + d)));
+  saveSettings();
+  applySettings();
+  showFontSizes();
+}
+function showFontSizes() { for (const k of ['fs', 'cfs']) $('#v-' + k).textContent = settings[k] + 'px'; }
 
 function closeSettings() { $('#settings').classList.remove('show'); }
 
@@ -215,6 +264,16 @@ document.querySelectorAll('[data-k]').forEach((el) => el.addEventListener('chang
   applySettings();
 }));
 
+// Last commit time, emphasised by freshness: <1 day green, <1 week blue, older dim.
+function updated(ts) {
+  if (!ts) return '';
+  const sec = Date.now() / 1000 - ts;
+  const [n, u] = sec < 3600 ? [Math.max(1, Math.floor(sec / 60)), 'm'] : sec < 86400 ? [Math.floor(sec / 3600), 'h']
+    : sec < 86400 * 30 ? [Math.floor(sec / 86400), 'd'] : sec < 86400 * 365 ? [Math.floor(sec / 86400 / 30), 'mo'] : [Math.floor(sec / 86400 / 365), 'y'];
+  const cls = sec < 86400 ? 'hot' : sec < 86400 * 7 ? 'warm' : 'old';
+  return `<span class="upd ${cls}" title="Last commit: ${esc(new Date(ts * 1000).toLocaleString())}">${n}${u}</span>`;
+}
+
 async function loadRepos() {
   const lists = await Promise.all(settings.folders.map((root) =>
     fetch(`/api/repos?root=${encodeURIComponent(root)}`).then((r) => (r.ok ? r.json() : [])).then((repos) => ({ root, repos }))));
@@ -230,6 +289,7 @@ async function loadRepos() {
       html += `<div class="repo ${r.path === current ? 'active' : ''}" data-name="${esc(r.path)}">
         <span class="dot ${r.changes ? 'dirty' : ''}"></span>
         <span class="n">${esc(parts[parts.length - 1] || root.split('/').pop())} <span class="br">${esc(r.branch)}</span></span>
+        ${updated(r.last)}
         ${r.changes ? `<span class="badge b-ch" title="changed files">${r.changes}</span>` : ''}
         ${r.ahead ? `<span class="badge b-up" title="ahead">↑${r.ahead}</span>` : ''}
         ${r.behind ? `<span class="badge b-dn" title="behind">↓${r.behind}</span>` : ''}
@@ -260,8 +320,8 @@ async function openRepo(name) {
 async function openCommit(hash, el) {
   document.querySelectorAll('.row.sel').forEach((r) => r.classList.remove('sel'));
   el.classList.add('sel');
-  const files = await api(`/api/commit?repo=${encodeURIComponent(current)}&hash=${hash}`);
-  showFiles(`Commit ${hash} — ${el.querySelector('.subj').textContent}`, files, true);
+  const { info, files } = await api(`/api/commit?repo=${encodeURIComponent(current)}&hash=${hash}`);
+  showFiles(`Commit ${hash} — ${el.dataset.subj}`, files, true, info);
 }
 
 function diffHtml(diff) {
@@ -275,10 +335,28 @@ function diffHtml(diff) {
   }).join('');
 }
 
-function showFiles(title, files, isCommit) {
+function person(name, email) {
+  return `<span><b>${esc(name)}</b> &lt;${esc(email)}&gt;</span>`;
+}
+
+function commitHeader(i) {
+  const [subject, ...rest] = i.message.split('\n');
+  const sameCommitter = i.committer === i.author && i.cemail === i.email;
+  return `<div class="cinfo"><div class="people">
+    <span>Author</span>${person(i.author, i.email)}
+    <span>Date</span><span>${esc(i.date)} (${esc(i.ago)})</span>
+    ${sameCommitter ? '' : `<span>Committer</span>${person(i.committer, i.cemail)}<span>Committed</span><span>${esc(i.cdate)}</span>`}
+    <span>Hash</span><span style="font-family:var(--mono)">${esc(i.full)}</span>
+    ${i.parents ? `<span>Parents</span><span style="font-family:var(--mono)">${esc(i.parents.split(' ').map((p) => p.slice(0, 7)).join(' '))}</span>` : ''}
+    ${i.refs ? `<span>Refs</span><span>${refsHtml(i.refs)}</span>` : ''}
+  </div><div class="msg"><b>${esc(subject)}</b>${rest.length ? '\n' + esc(rest.join('\n')) : ''}</div></div>`;
+}
+
+function showFiles(title, files, isCommit, info) {
   const back = isCommit ? `<button onclick="openRepo(current)">Working changes</button>` : '';
   let html = `<div class="bar"><b>${esc(title)} (${files.length})</b>${back}
     <button onclick="toggleAll(true)">Expand all</button><button onclick="toggleAll(false)">Collapse all</button></div>`;
+  if (info) html += commitHeader(info);
   if (!files.length) html += '<div class="empty">No changes</div>';
   for (const f of files) {
     const code = f.code.trim()[0] || '?';
@@ -344,19 +422,99 @@ function refsHtml(refs) {
   }).join('');
 }
 
+function avatar(name) {
+  let h = 0;
+  for (const ch of name || '') h = (h * 31 + ch.charCodeAt(0)) | 0;
+  return `<span class="av" style="background:${COLORS[Math.abs(h) % COLORS.length]}">${esc((name || '?').trim()[0]?.toUpperCase() || '?')}</span>`;
+}
+
+function laneSvg(lanes, width) {
+  const lines = lanes.map((h, j) => (h ? `<path d="M${lx(j)} 0V1000" stroke="${COLORS[j % COLORS.length]}"/>` : '')).join('');
+  return `<svg class="g" width="${width}" preserveAspectRatio="none" viewBox="0 0 ${width} 1000"><g fill="none" stroke-width="2" vector-effect="non-scaling-stroke">${lines}</g></svg>`;
+}
+
+function setGraphView(v) {
+  settings.graphView = v;
+  saveSettings();
+  if (lastLog) showGraph(lastLog);
+}
+
+let lastLog = null;
 function showGraph(log) {
+  lastLog = log;
+  const long = settings.graphView === 'long';
   const rows = layout(log);
   const maxLanes = Math.min(12, Math.max(1, ...rows.map((r) => Math.max(r.before.length, r.after.length))));
   const width = lx(maxLanes - 1) + LANE / 2 + 2;
-  let html = `<div class="bar"><b>Graph (latest ${log.length})</b></div>`;
+  let html = `<div class="bar"><b>Graph (latest ${log.length})</b>
+    <button onclick="setGraphView('${long ? 'simple' : 'long'}')" title="Toggle full-length commit titles">${long ? 'Simple view' : 'Long view'}</button>
+    <button onclick="syncRepo('fetch', this)">Fetch</button><button onclick="syncRepo('pull', this)">Pull</button></div>`;
   for (const r of rows) {
     const c = r.c;
-    html += `<div class="row" onclick="openCommit('${c.hash}', this)">
-      ${rowSvg(r, width)}<span class="h">${c.hash}</span>
-      <span class="s">${refsHtml(c.refs)}<span class="subj">${esc(c.subject)}</span></span>
-      <span class="meta a">${esc(c.author)}</span><span class="meta">${esc(c.date)}</span></div>`;
+    const subj = `${refsHtml(c.refs)}<span class="subj">${esc(c.subject)}</span>${c.body ? '<span class="more" title="Has more details — click to view">…</span>' : ''}`;
+    const who = `<span class="who" title="${esc(c.author)} <${esc(c.email)}>">${avatar(c.author)}<span class="n">${esc(c.author)}</span></span>`;
+    html += long
+      ? `<div class="row long" data-subj="${esc(c.subject)}" onclick="openCommit('${c.hash}', this)">
+        <span class="gcol">${rowSvg(r, width)}${laneSvg(r.after, width)}</span>
+        <div class="lv"><div class="l1"><span class="h">${c.hash}</span>${who}<span class="meta">${esc(c.date)}</span></div>
+        <div class="l2">${subj}</div></div></div>`
+      : `<div class="row" data-subj="${esc(c.subject)}" onclick="openCommit('${c.hash}', this)">
+        ${rowSvg(r, width)}<span class="h">${c.hash}</span><span class="s">${subj}</span>${who}<span class="meta">${esc(c.date)}</span></div>`;
   }
   $('#bottom').innerHTML = html;
+}
+
+let toastTimer;
+function toast(html, sticky) {
+  const t = $('#toast');
+  t.innerHTML = html;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  if (!sticky) toastTimer = setTimeout(() => t.classList.remove('show'), 5000);
+}
+$('#toast').addEventListener('click', () => $('#toast').classList.remove('show'));
+
+async function runSync(action, repo) {
+  try {
+    const r = await fetch(`/api/${action}?repo=${encodeURIComponent(repo)}`, { method: 'POST' });
+    return await r.json();
+  } catch (e) { return { ok: false, output: String(e) }; }
+}
+
+async function syncRepo(action, btn) {
+  const repo = current;
+  btn.disabled = true;
+  toast(`${action} ${esc(repo.split('/').pop())}…`, true);
+  const r = await runSync(action, repo);
+  toast(`<span class="${r.ok ? '' : 'bad'}">${r.ok ? '✓' : '✗'} ${action} ${esc(repo.split('/').pop())}</span>\n${esc(r.output || r.error || 'up to date')}`, !r.ok);
+  await loadRepos();
+  if (current === repo) openRepo(repo);
+}
+
+let syncing = false;
+async function syncAll(action) {
+  if (syncing) return;
+  syncing = true;
+  const repos = [...document.querySelectorAll('.repo')].map((el) => el.dataset.name);
+  const failed = [];
+  let done = 0;
+  toast(`${action} 0/${repos.length}…`, true);
+  const queue = repos.slice();
+  const worker = async () => {
+    while (queue.length) {
+      const repo = queue.shift();
+      const r = await runSync(action, repo);
+      if (!r.ok) failed.push(`${repo.split('/').pop()}: ${(r.output || r.error || '').split('\n').pop()}`);
+      toast(`${action} ${++done}/${repos.length}…`, true);
+    }
+  };
+  await Promise.all(Array.from({ length: 4 }, worker));
+  syncing = false;
+  toast(failed.length
+    ? `<span class="bad">✗ ${action}: ${failed.length} of ${repos.length} failed</span>\n${esc(failed.join('\n'))}`
+    : `✓ ${action} done for ${repos.length} repos`, failed.length > 0);
+  await loadRepos();
+  if (current) openRepo(current);
 }
 
 function drag(handle, onMove, key) {
@@ -385,6 +543,7 @@ try {
   if (localStorage.getItem('gv-top')) $('#top').style.height = localStorage.getItem('gv-top');
 } catch {}
 
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 loadSettings().then(() => { applySettings(); loadRepos(); });
 setInterval(loadRepos, 30000);
 </script>
